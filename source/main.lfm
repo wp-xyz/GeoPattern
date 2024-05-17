@@ -1,0 +1,467 @@
+object MainForm: TMainForm
+  Left = 474
+  Height = 465
+  Top = 238
+  Width = 786
+  ActiveControl = GeneratorEdit
+  Caption = 'Geometric Pattern Generator'
+  ClientHeight = 465
+  ClientWidth = 786
+  ShowHint = True
+  LCLVersion = '3.99.0.0'
+  OnCreate = FormCreate
+  object PaintBox1: TPaintBox
+    Left = 175
+    Height = 415
+    Top = 42
+    Width = 603
+    Align = alClient
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Right = 8
+    BorderSpacing.Bottom = 8
+    OnPaint = PaintBox1Paint
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 42
+    Top = 0
+    Width = 786
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 42
+    ClientWidth = 786
+    TabOrder = 0
+    object SaveButton: TButton
+      AnchorSideTop.Control = Panel1
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = Panel1
+      AnchorSideRight.Side = asrBottom
+      Left = 703
+      Height = 25
+      Hint = 'Save the pattern to png or svg files '#13#10'(Right-click to select png size)'
+      Top = 9
+      Width = 75
+      Anchors = [akTop, akRight]
+      BorderSpacing.Around = 8
+      Caption = 'Save...'
+      Enabled = False
+      PopupMenu = SizePopupMenu
+      TabOrder = 0
+      OnClick = SaveButtonClick
+    end
+    object GeneratorEdit: TEdit
+      AnchorSideLeft.Control = Button1
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = Panel1
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = SaveButton
+      Left = 110
+      Height = 23
+      Top = 10
+      Width = 585
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 8
+      TabOrder = 1
+      TextHint = 'Type some text to generate a patten from it'
+      OnChange = GeneratorEditChange
+    end
+    object Button1: TButton
+      AnchorSideLeft.Control = Panel1
+      AnchorSideTop.Control = Panel1
+      AnchorSideTop.Side = asrCenter
+      Left = 8
+      Height = 25
+      Hint = 'Change parameters for pattern generation'
+      Top = 9
+      Width = 94
+      AutoSize = True
+      BorderSpacing.Left = 8
+      Caption = 'Parameters...'
+      TabOrder = 2
+      OnClick = Button1Click
+    end
+  end
+  object ParamsPanel: TPanel
+    Left = 8
+    Height = 415
+    Top = 42
+    Width = 159
+    Align = alLeft
+    AutoSize = True
+    BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 8
+    BevelOuter = bvNone
+    ClientHeight = 415
+    ClientWidth = 159
+    TabOrder = 1
+    Visible = False
+    object GroupBox1: TGroupBox
+      Left = 0
+      Height = 125
+      Top = 0
+      Width = 159
+      Align = alTop
+      AutoSize = True
+      Caption = 'Colors'
+      ClientHeight = 105
+      ClientWidth = 155
+      TabOrder = 0
+      object clbBaseColor: TColorButton
+        AnchorSideLeft.Control = cbOverrideBaseColor
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = GroupBox1
+        AnchorSideRight.Side = asrBottom
+        Left = 99
+        Height = 25
+        Hint = 'Background color of the pattern'
+        Top = 0
+        Width = 48
+        Anchors = [akTop, akRight]
+        BorderSpacing.Right = 8
+        BorderWidth = 2
+        ButtonColorSize = 16
+        ButtonColor = clBlack
+        Enabled = False
+        OnColorChanged = clbColorChanged
+      end
+      object cbOverrideBaseColor: TCheckBox
+        AnchorSideLeft.Control = GroupBox1
+        AnchorSideTop.Control = clbBaseColor
+        AnchorSideTop.Side = asrCenter
+        Left = 16
+        Height = 19
+        Top = 3
+        Width = 42
+        BorderSpacing.Left = 16
+        Caption = 'Base'
+        TabOrder = 0
+        OnChange = cbOverrideColorChange
+      end
+      object cbOverrideFillColor1: TCheckBox
+        AnchorSideLeft.Control = GroupBox1
+        AnchorSideTop.Control = clbFillColor1
+        AnchorSideTop.Side = asrCenter
+        Left = 16
+        Height = 19
+        Top = 28
+        Width = 42
+        BorderSpacing.Left = 16
+        Caption = 'Fill 1'
+        TabOrder = 1
+        OnChange = cbOverrideColorChange
+      end
+      object clbFillColor1: TColorButton
+        AnchorSideLeft.Control = cbOverrideFillColor1
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = clbBaseColor
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = GroupBox1
+        AnchorSideRight.Side = asrBottom
+        Left = 99
+        Height = 25
+        Hint = 'First color of the semi-transparent pattern drawn over the background'
+        Top = 25
+        Width = 48
+        Anchors = [akTop, akRight]
+        BorderSpacing.Right = 8
+        BorderWidth = 2
+        ButtonColorSize = 16
+        ButtonColor = clBlack
+        Enabled = False
+        OnColorChanged = clbColorChanged
+      end
+      object cbOverrideFillColor2: TCheckBox
+        AnchorSideLeft.Control = GroupBox1
+        AnchorSideTop.Control = clbFillColor2
+        AnchorSideTop.Side = asrCenter
+        Left = 16
+        Height = 19
+        Top = 53
+        Width = 42
+        BorderSpacing.Left = 16
+        Caption = 'Fill 2'
+        TabOrder = 2
+        OnChange = cbOverrideColorChange
+      end
+      object clbFillColor2: TColorButton
+        AnchorSideLeft.Control = cbOverrideFillColor2
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = clbFillColor1
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = GroupBox1
+        AnchorSideRight.Side = asrBottom
+        Left = 99
+        Height = 25
+        Hint = 'Second color of the semi-transparent pattern drawn over the background'
+        Top = 50
+        Width = 48
+        Anchors = [akTop, akRight]
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        BorderWidth = 2
+        ButtonColorSize = 16
+        ButtonColor = clBlack
+        Enabled = False
+        OnColorChanged = clbColorChanged
+      end
+      object cbOverrideStrokeColor: TCheckBox
+        AnchorSideLeft.Control = GroupBox1
+        AnchorSideTop.Control = clbStrokeColor
+        AnchorSideTop.Side = asrCenter
+        Left = 16
+        Height = 19
+        Top = 75
+        Width = 51
+        BorderSpacing.Left = 16
+        Caption = 'Stroke'
+        TabOrder = 3
+        OnChange = cbOverrideColorChange
+      end
+      object clbStrokeColor: TColorButton
+        AnchorSideLeft.Control = cbOverrideStrokeColor
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = cbOverrideFillColor2
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = GroupBox1
+        AnchorSideRight.Side = asrBottom
+        Left = 99
+        Height = 25
+        Hint = 'Color of lines in the pattern'
+        Top = 72
+        Width = 48
+        Anchors = [akTop, akRight]
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        BorderWidth = 2
+        ButtonColorSize = 16
+        ButtonColor = clBlack
+        Enabled = False
+        OnColorChanged = clbColorChanged
+      end
+    end
+    object GroupBox2: TGroupBox
+      Left = 0
+      Height = 78
+      Top = 137
+      Width = 159
+      Align = alTop
+      AutoSize = True
+      BorderSpacing.Top = 12
+      Caption = 'Fill opacity'
+      ClientHeight = 58
+      ClientWidth = 155
+      TabOrder = 1
+      object seMaxFillOpacity: TFloatSpinEdit
+        AnchorSideLeft.Control = cbOverrideMaxFillOpacity
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = GroupBox2
+        Left = 97
+        Height = 23
+        Hint = 'Maximum opacity of the pattern elements'
+        Top = 0
+        Width = 50
+        Alignment = taRightJustify
+        BorderSpacing.Left = 8
+        Enabled = False
+        Increment = 0.01
+        MaxValue = 1
+        TabOrder = 0
+        OnChange = seOpacityChange
+      end
+      object seMinFillOpacity: TFloatSpinEdit
+        AnchorSideLeft.Control = seMaxFillOpacity
+        AnchorSideTop.Control = seMaxFillOpacity
+        AnchorSideTop.Side = asrBottom
+        Left = 97
+        Height = 23
+        Hint = 'Minimum opacity of the pattern elements'
+        Top = 27
+        Width = 50
+        Alignment = taRightJustify
+        BorderSpacing.Top = 4
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        Enabled = False
+        Increment = 0.01
+        MaxValue = 1
+        TabOrder = 1
+        OnChange = seMinFillOpacityChange
+      end
+      object cbOverrideMaxFillOpacity: TCheckBox
+        AnchorSideLeft.Control = GroupBox2
+        AnchorSideTop.Control = seMaxFillOpacity
+        AnchorSideTop.Side = asrCenter
+        AnchorSideRight.Control = seMaxFillOpacity
+        Left = 16
+        Height = 19
+        Top = 2
+        Width = 73
+        BorderSpacing.Left = 16
+        BorderSpacing.Right = 8
+        Caption = 'Maximum'
+        TabOrder = 2
+        OnChange = cbOverrideMaxFillOpacityChange
+      end
+      object cbOverrideMinFillOpacity: TCheckBox
+        AnchorSideLeft.Control = cbOverrideMaxFillOpacity
+        AnchorSideTop.Control = seMinFillOpacity
+        AnchorSideTop.Side = asrCenter
+        Left = 16
+        Height = 19
+        Top = 29
+        Width = 71
+        Caption = 'Minimum'
+        TabOrder = 3
+        OnChange = cbOverrideMinFillOpacityChange
+      end
+    end
+    object GroupBox3: TGroupBox
+      Left = 0
+      Height = 51
+      Top = 227
+      Width = 159
+      Align = alTop
+      AutoSize = True
+      BorderSpacing.Top = 12
+      Caption = 'Stroke opacity'
+      ClientHeight = 31
+      ClientWidth = 155
+      TabOrder = 2
+      object seStrokeOpacity: TFloatSpinEdit
+        AnchorSideLeft.Control = cbOverrideStrokeOpacity
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = GroupBox3
+        AnchorSideRight.Control = GroupBox3
+        AnchorSideRight.Side = asrBottom
+        Left = 97
+        Height = 23
+        Hint = 'Opacity of pattern lines'
+        Top = 0
+        Width = 50
+        Alignment = taRightJustify
+        Anchors = [akTop, akRight]
+        BorderSpacing.Left = 8
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        Enabled = False
+        Increment = 0.01
+        MaxValue = 1
+        TabOrder = 0
+        OnChange = seStrokeOpacityChange
+      end
+      object cbOverrideStrokeOpacity: TCheckBox
+        AnchorSideLeft.Control = GroupBox3
+        AnchorSideTop.Control = seStrokeOpacity
+        AnchorSideTop.Side = asrCenter
+        AnchorSideRight.Control = seStrokeOpacity
+        Left = 16
+        Height = 19
+        Top = 2
+        Width = 47
+        BorderSpacing.Left = 16
+        BorderSpacing.Right = 8
+        Caption = 'Value'
+        TabOrder = 1
+        OnChange = cbOverrideStrokeOpacityChange
+      end
+    end
+    object Label1: TLabel
+      AnchorSideLeft.Control = GroupBox3
+      AnchorSideTop.Control = GroupBox3
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox3
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 30
+      Top = 286
+      Width = 159
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 8
+      Caption = 'Default values will be applied for unchecked parameters.'
+      WordWrap = True
+    end
+  end
+  object SizePopupMenu: TPopupMenu
+    Left = 688
+    Top = 65
+    object MenuItem9: TMenuItem
+      AutoCheck = True
+      Caption = 'Single tile'
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+    object MenuItem1: TMenuItem
+      AutoCheck = True
+      Caption = 'Current size'
+      Checked = True
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+    object MenuItem2: TMenuItem
+      AutoCheck = True
+      Caption = 'Monitor size'
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+    object Separator1: TMenuItem
+      Caption = '-'
+      GroupIndex = 100
+      RadioItem = True
+    end
+    object MenuItem3: TMenuItem
+      AutoCheck = True
+      Caption = '640 x 480'
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+    object MenuItem4: TMenuItem
+      AutoCheck = True
+      Caption = '800 x 600'
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+    object MenuItem5: TMenuItem
+      AutoCheck = True
+      Caption = '1024 x 768'
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+    object MenuItem6: TMenuItem
+      AutoCheck = True
+      Caption = '1280 x 720'
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+    object MenuItem7: TMenuItem
+      AutoCheck = True
+      Caption = '1920 x 1080'
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+    object MenuItem8: TMenuItem
+      AutoCheck = True
+      Caption = '3840 x 2160'
+      GroupIndex = 100
+      RadioItem = True
+      OnClick = SaveButtonClick
+    end
+  end
+  object SaveDialog: TSaveDialog
+    DefaultExt = '.png'
+    Filter = 'png files|*.png|svg files|*.svg'
+    Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
+    Left = 560
+    Top = 65
+  end
+end
