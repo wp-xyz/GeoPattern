@@ -10,9 +10,17 @@ uses
   uBasicGeoDrawer;
 
 type
+  TGeoPatternType = (
+    ptHexagons, ptOverlappingCircles, ptSquares, ptOctogons,
+    ptTriangles, ptOverlappingRings, ptConcentricCircles, ptNestedSquares,
+    ptMosaicSquares, ptSineWaves, ptPlusSigns, ptXes,
+    ptChevrons, ptDiamonds, ptPlaid
+  );
+
   TGeoPattern = class;
 
   TGeoPatternOptions = record
+    OverridePatternType: Boolean;
     OverrideBaseColor: Boolean;
     OverrideFillColor1: Boolean;
     OverrideFillColor2: Boolean;
@@ -20,6 +28,7 @@ type
     OverrideMinFillOpacity: Boolean;
     OverrideStrokeColor: Boolean;
     OverrideStrokeOpacity: Boolean;
+    PatternType: TGeoPatternType;
     BaseColor: TColor;
     FillColor1: TColor;
     FillColor2: TColor;
@@ -69,6 +78,7 @@ type
     procedure GenerateMosaicSquares;
     procedure GenerateSineWaves;
     procedure GeneratePlusSigns;
+    procedure GenerateXes;
     procedure GenerateChevrons;
     procedure GenerateDiamonds;
     procedure GeneratePlaid;
@@ -81,13 +91,14 @@ type
       ADrawerClass: TGeoDrawerClass; AOptions: TGeoPatternOptions);
     destructor Destroy; override;
     procedure DrawToCanvas(ACanvas: TCanvas);
+    class procedure GetPatternList(AList: TStrings);
     procedure SaveToFile(AFileName: String);
   end;
 
 implementation
 
 uses
-  sha1;
+  sha1, TypInfo;
 
 const
   BASE_COLOR = TColor($3c3c93);        // '#933c3c'
@@ -120,6 +131,7 @@ end;
 
 procedure TGeoPatternOptions.Init;
 begin
+  OverridePatternType := false;
   OverrideBaseColor := false;
   OverrideFillColor1 := false;
   OverrideFillColor2 := false;
@@ -127,6 +139,7 @@ begin
   OverrideMaxFillOpacity := false;
   OverrideMinFillOpacity := false;
   OverrideStrokeOpacity := false;
+  PatternType := Low(TGeoPatternType);
   BaseColor := BASE_COLOR;
   FillColor1 := FILL_COLOR_LIGHT;
   FillColor2 := FILL_COLOR_DARK;
@@ -337,6 +350,28 @@ begin
   FDrawer.SaveToFile(AFileName, round(w), round(h));
 end;
 
+class procedure TGeoPattern.GetPatternList(AList: TStrings);
+var
+  pt: TGeoPatternType;
+  s: String;
+  i: Integer;
+begin
+  AList.BeginUpdate;
+  try
+    AList.Clear;
+    for pt in TGeoPatternType do
+    begin
+      s := GetEnumName(TypeInfo(TGeoPatternType), Integer(pt));
+      Delete(s, 1, 2);  // Remove the 'pt'
+      for i := Length(s) downto 2 do
+        if s[i] in ['A'..'Z'] then Insert(' ', s, i);
+      AList.Add(s);
+    end;
+  finally
+    AList.EndUpdate;
+  end;
+end;
+
 procedure TGeoPattern.GenerateBackground;
 var
   hue: Integer;
@@ -366,8 +401,11 @@ procedure TGeoPattern.GeneratePattern;
 var
   idx: Integer;
 begin
-  idx := HexVal(FHash, 0);
-  case idx mod 14 of
+  if FOptions.OverridePatternType then
+    idx := ord(FOptions.PatternType)
+  else
+    idx := HexVal(FHash, 0);
+  case idx mod 15 of
     0: GenerateHexagons;
     1: GenerateOverlappingCircles;
     2: GenerateSquares;
@@ -379,9 +417,10 @@ begin
     8: GenerateMosaicSquares;
     9: GenerateSineWaves;
    10: GeneratePlusSigns;
-   11: GenerateChevrons;
-   12: GenerateDiamonds;
-   13: GeneratePlaid;
+   11: GenerateXes;
+   12: GenerateChevrons;
+   13: GenerateDiamonds;
+   14: GeneratePlaid;
   end;
 end;
 
@@ -789,6 +828,8 @@ begin
     end;
 end;
 
+// Missing part for generator string 111111111111111111111111111111111111111111111111111111111111111
+// when amplitude factor 1.5 is used --> replaced by 1.0 --> ok
 procedure TGeoPattern.GenerateSineWaves;
 var
   period: Integer;
@@ -812,12 +853,17 @@ begin
 
   xOffset := period / 4 * 0.7;
 
+  {             c----x----c
+
+                /        \
+
+         x----c            c----x }
   pts.Init(8);
   // 1st segment
-  pts.Data[0] := DblPoint(0, amplitude);                    // 1st curve point
-  pts.Data[1] := DblPoint(xOffset, amplitude);              // control point of 1st curve pt
-  pts.Data[2] := DblPoint(period*0.5 - xOffset, 0);         // control point of 2nd curve pt
-  pts.Data[3] := DblPoint(period*0.5, 0);                   // 2nd curve point
+  pts.Data[0] := DblPoint(0, amplitude);                    // 1st curve point (x)
+  pts.Data[1] := DblPoint(xOffset, amplitude);              // control point of 1st curve pt (c)
+  pts.Data[2] := DblPoint(period*0.5 - xOffset, 0);         // control point of 2nd curve pt (c)
+  pts.Data[3] := DblPoint(period*0.5, 0);                   // 2nd curve point (x)
   // 2nd segment
   pts.Data[4] := pts.Data[3];                               // duplicated 2nd curve point as start point of 2nd segment  // not needed in svg S segment
   pts.Data[5] := DblPoint(period*0.5 + xOffset, 0);         // control point of 2nd curve pt  // not needed in svg S segment
@@ -829,8 +875,8 @@ begin
     value := HexVal(FHash, i);
     FDrawer.StrokeOpacity := FillOpacity(value);
     FDrawer.StrokeColor := FillColor(value);
-    FDrawer.PolyBezier(pts.Translate(0, waveWidth*i - amplitude*1.5));
-    FDrawer.PolyBezier(pts.Translate(0, waveWidth*i - amplitude*1.5 + waveWidth*36));
+    FDrawer.PolyBezier(pts.Translate(0, waveWidth*i - amplitude*1.0));          // wp: Replaced factor 1.5 by 1.0
+    FDrawer.PolyBezier(pts.Translate(0, waveWidth*i - amplitude*1.0 + waveWidth*36));
   end;
 end;
 
@@ -886,6 +932,40 @@ begin
           4 * plusSize - y * squareSize - plusSize / 2)
         );
 
+      inc(i);
+    end;
+  end;
+end;
+
+{ Changed the algorithm from that in the "official" version becasuse that
+  produces the same pattern as the "diamonds" generator (https://github.com/suyash/geopattern-rs ...)
+  and looks strange here in the BGRA version. }
+procedure TGeoPattern.GenerateXes;
+var
+  value: Integer;
+  squareSize, xSize, xSize2: Double;
+  xShape: TDblPoints;
+  x, y, i: Integer;
+begin
+  squareSize := Map(HexVal(FHash, 0), 0, 15, 10, 25);
+  xSize := squareSize * 3 * 0.943;    // width of 45°-rotated "plus" (0.943 = 2 * sqrt(2) / 3)
+  xSize2 := xSize / 2;                // half-width of rotated "plus"
+  xShape := BuildPlusShape(squareSize).Rotate(45, xSize2, xSize2);
+
+  FTileWidth := xSize*6;
+  FTileHeight := xSize*6;
+  FDrawer.Init(FTileWidth, FTileHeight, FBkColor);
+  FDrawer.StrokeColor := clNone;
+
+  i := 0;
+  for y := 0 to 5 do
+  begin
+    for x := 0 to 5 do
+    begin
+      value := HexVal(FHash, i);
+      FDrawer.FillColor := FillColor(value);
+      FDrawer.FillOpacity := FillOpacity(value);
+      FDrawer.Polygon(xShape.Translate(x * xSize, y * xSize));
       inc(i);
     end;
   end;

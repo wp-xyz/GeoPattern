@@ -122,7 +122,6 @@ begin
     Result := ''
   else
     Result := Format('fill-opacity="%.3g" ', [FFillOpacity], FPointSettings);
-    //Result := Format('fill-opacity="%d%%" ', [round(FFillOpacity * 100)]);
 end;
 
 function TGeoDrawerSVG.GetStrokeColor: TColor;
@@ -149,7 +148,6 @@ begin
     Result := ''
   else
     Result := Format('stroke-opacity="%.3g" ', [FStrokeOpacity], FPointSettings);
-    // Result := Format('stroke-opacity="%d%%" ', [round(FStrokeOpacity * 100)]);
 end;
 
 function TGeoDrawerSVG.GetStrokeWidth: Double;

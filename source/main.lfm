@@ -9,6 +9,7 @@ object MainForm: TMainForm
   ClientWidth = 786
   ShowHint = True
   LCLVersion = '3.99.0.0'
+  OnActivate = FormActivate
   OnCreate = FormCreate
   object PaintBox1: TPaintBox
     Left = 175
@@ -100,10 +101,11 @@ object MainForm: TMainForm
     object GroupBox1: TGroupBox
       Left = 0
       Height = 125
-      Top = 0
+      Top = 63
       Width = 159
       Align = alTop
       AutoSize = True
+      BorderSpacing.Top = 12
       Caption = 'Colors'
       ClientHeight = 105
       ClientWidth = 155
@@ -245,7 +247,7 @@ object MainForm: TMainForm
     object GroupBox2: TGroupBox
       Left = 0
       Height = 78
-      Top = 137
+      Top = 200
       Width = 159
       Align = alTop
       AutoSize = True
@@ -321,7 +323,7 @@ object MainForm: TMainForm
     object GroupBox3: TGroupBox
       Left = 0
       Height = 51
-      Top = 227
+      Top = 290
       Width = 159
       Align = alTop
       AutoSize = True
@@ -375,13 +377,59 @@ object MainForm: TMainForm
       AnchorSideRight.Control = GroupBox3
       AnchorSideRight.Side = asrBottom
       Left = 0
-      Height = 30
-      Top = 286
+      Height = 45
+      Top = 349
       Width = 159
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Top = 8
-      Caption = 'Default values will be applied for unchecked parameters.'
+      Caption = 'Default values will be applied in case of unchecked parameters.'
       WordWrap = True
+    end
+    object gbPatterns: TGroupBox
+      Left = 0
+      Height = 51
+      Top = 0
+      Width = 159
+      Align = alTop
+      AutoSize = True
+      Caption = 'Patterns'
+      ClientHeight = 31
+      ClientWidth = 155
+      TabOrder = 3
+      object cmbPatterns: TComboBox
+        AnchorSideLeft.Control = cbOverridePatternType
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = gbPatterns
+        AnchorSideRight.Control = gbPatterns
+        AnchorSideRight.Side = asrBottom
+        Left = 38
+        Height = 23
+        Top = 0
+        Width = 109
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Left = 4
+        BorderSpacing.Right = 8
+        BorderSpacing.Bottom = 8
+        DropDownCount = 32
+        Enabled = False
+        ItemHeight = 15
+        ItemWidth = 200
+        Style = csDropDownList
+        TabOrder = 0
+        OnChange = cmbPatternsChange
+      end
+      object cbOverridePatternType: TCheckBox
+        AnchorSideLeft.Control = gbPatterns
+        AnchorSideTop.Control = cmbPatterns
+        AnchorSideTop.Side = asrCenter
+        Left = 16
+        Height = 17
+        Top = 3
+        Width = 18
+        BorderSpacing.Left = 16
+        TabOrder = 1
+        OnChange = cbOverridePatternTypeChange
+      end
     end
   end
   object SizePopupMenu: TPopupMenu

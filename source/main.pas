@@ -20,13 +20,16 @@ type
     cbOverrideFillColor2: TCheckBox;
     cbOverrideStrokeOpacity: TCheckBox;
     cbOverrideBaseColor: TCheckBox;
+    cbOverridePatternType: TCheckBox;
     clbBaseColor: TColorButton;
     cbOverrideMaxFillOpacity: TCheckBox;
     cbOverrideMinFillOpacity: TCheckBox;
     clbStrokeColor: TColorButton;
     clbFillColor1: TColorButton;
     clbFillColor2: TColorButton;
+    cmbPatterns: TComboBox;
     GroupBox3: TGroupBox;
+    gbPatterns: TGroupBox;
     Label1: TLabel;
     seMaxFillOpacity: TFloatSpinEdit;
     seStrokeOpacity: TFloatSpinEdit;
@@ -51,11 +54,14 @@ type
     SizePopupMenu: TPopupMenu;
     Separator1: TMenuItem;
     procedure Button1Click(Sender: TObject);
+    procedure cbOverridePatternTypeChange(Sender: TObject);
     procedure clbColorChanged(Sender: TObject);
     procedure cbOverrideColorChange(Sender: TObject);
     procedure cbOverrideMaxFillOpacityChange(Sender: TObject);
     procedure cbOverrideMinFillOpacityChange(Sender: TObject);
     procedure cbOverrideStrokeOpacityChange(Sender: TObject);
+    procedure cmbPatternsChange(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
     procedure GeneratorEditChange(Sender: TObject);
@@ -65,6 +71,7 @@ type
     procedure seStrokeOpacityChange(Sender: TObject);
   private
     FPatternOptions: TGeoPatternOptions;
+    FActivated: Boolean;
 
   public
 
@@ -177,6 +184,13 @@ begin
   ParamsPanel.Visible := not ParamsPanel.Visible;
 end;
 
+procedure TMainForm.cbOverridePatternTypeChange(Sender: TObject);
+begin
+  FPatternOptions.OverridePatternType := cbOverridePatternType.Checked;
+  cmbPatterns.Enabled := FPatternOptions.OverridePatternType;
+  Paintbox1.Invalidate;
+end;
+
 procedure TMainForm.cbOverrideColorChange(Sender: TObject);
 begin
   if Sender = cbOverrideBaseColor then
@@ -224,6 +238,23 @@ begin
   Paintbox1.Invalidate;
 end;
 
+procedure TMainForm.cmbPatternsChange(Sender: TObject);
+begin
+  FPatternOptions.PatternType := TGeoPatternType(cmbPatterns.ItemIndex);
+  Paintbox1.Invalidate;
+end;
+
+procedure TMainForm.FormActivate(Sender: TObject);
+begin
+  if not FActivated then
+  begin
+    FActivated := true;
+    Constraints.MinHeight := Panel1.Height +
+      Label1.Top + Label1.Height +
+      ParamsPanel.BorderSpacing.Bottom;
+  end;
+end;
+
 procedure TMainForm.seOpacityChange(Sender: TObject);
 begin
   if Sender = seMaxFillOpacity then
@@ -252,6 +283,8 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   FPatternOptions.Init;
+  TGeoPattern.GetPatternList(cmbPatterns.Items);
+  cmbPatterns.ItemIndex := ord(FPatternOptions.PatternType);
   clbBaseColor.ButtonColor := FPatternOptions.BaseColor;
   clbFillColor1.ButtonColor := FPatternOptions.FillColor1;
   clbFillColor2.ButtonColor := FPatternOptions.FillColor2;

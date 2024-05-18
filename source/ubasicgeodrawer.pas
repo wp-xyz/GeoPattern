@@ -82,6 +82,7 @@ begin
   SetLength(Data, ACount);
 end;
 
+// Angle in degrees
 function TDblPoints.Rotate(Angle, CenterX, CenterY: Double): TDblPoints;
 var
   sa, ca: Double;
