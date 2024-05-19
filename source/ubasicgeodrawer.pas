@@ -82,7 +82,7 @@ begin
   SetLength(Data, ACount);
 end;
 
-// Angle in degrees
+// Angle in degrees, positive in counter-clockwise direction (opposite to svg!)
 function TDblPoints.Rotate(Angle, CenterX, CenterY: Double): TDblPoints;
 var
   sa, ca: Double;
