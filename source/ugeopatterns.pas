@@ -14,7 +14,8 @@ type
     ptHexagons, ptOverlappingCircles, ptSquares, ptOctogons,
     ptTriangles, ptOverlappingRings, ptConcentricCircles, ptNestedSquares,
     ptMosaicSquares, ptSineWaves, ptPlusSigns, ptXes,
-    ptChevrons, ptDiamonds, ptPlaid, ptTesselation, ptPackedCircles
+    ptChevrons, ptDiamonds, ptPlaid, ptTesselation,
+    ptPackedCircles, ptPietMondrian
   );
 
   TGeoPattern = class;
@@ -48,6 +49,7 @@ type
     FWidth, FHeight: Integer;
     FTileWidth, FTileHeight: Double;
     FOptions: TGeoPatternOptions;
+    FPatternType: TGeoPatternType;
 
     function BuildPlusShape(ASquareSize: Double): TDblPoints;
 
@@ -75,6 +77,7 @@ type
     procedure GeneratePlaid;
     procedure GenerateTesselation;
     procedure GeneratePackedCircles;
+    procedure GeneratePietMondrian;
 
     procedure GenerateBackground;
     procedure GeneratePattern;
@@ -86,6 +89,7 @@ type
     procedure DrawToCanvas(ACanvas: TCanvas);
     class procedure GetPatternList(AList: TStrings);
     procedure SaveToFile(AFileName: String);
+    property PatternType: TGeoPatternType read FPatternType;
   end;
 
 implementation
@@ -303,30 +307,33 @@ end;
 
 procedure TGeoPattern.GeneratePattern;
 var
-  idx: Integer;
+  idx, n: Integer;
 begin
   if FOptions.OverridePatternType then
     idx := ord(FOptions.PatternType)
   else
     idx := HexVal(FHash, 0, 2);
-  case idx mod 17 of //ord(High(TGeoPatternType))+1 of
-    0: GenerateHexagons;
-    1: GenerateOverlappingCircles;
-    2: GenerateSquares;
-    3: GenerateOctogons;
-    4: GenerateTriangles;
-    5: GenerateOverlappingRings;
-    6: GenerateConcentricCircles;
-    7: GenerateNestedSquares;
-    8: GenerateMosaicSquares;
-    9: GenerateSineWaves;
-   10: GeneratePlusSigns;
-   11: GenerateXes;
-   12: GenerateChevrons;
-   13: GenerateDiamonds;
-   14: GeneratePlaid;
-   15: GenerateTesselation;
-   16: GeneratePackedCircles;
+  n := ord(High(TGeoPatternType)) + 1;
+  FPatternType := TGeoPatternType(idx mod n);
+  case FPatternType of
+    ptHexagons: GenerateHexagons;
+    ptOverlappingCircles: GenerateOverlappingCircles;
+    ptSquares: GenerateSquares;
+    ptOctogons: GenerateOctogons;
+    ptTriangles: GenerateTriangles;
+    ptOverlappingRings: GenerateOverlappingRings;
+    ptConcentricCircles: GenerateConcentricCircles;
+    ptNestedSquares: GenerateNestedSquares;
+    ptMosaicSquares: GenerateMosaicSquares;
+    ptSineWaves: GenerateSineWaves;
+    ptPlusSigns: GeneratePlusSigns;
+    ptXes: GenerateXes;
+    ptChevrons: GenerateChevrons;
+    ptDiamonds: GenerateDiamonds;
+    ptPlaid: GeneratePlaid;
+    ptTesselation: GenerateTesselation;
+    ptPackedCircles: GeneratePackedCircles;
+    ptPietMondrian: GeneratePietMondrian;
   end;
 end;
 
@@ -863,6 +870,7 @@ begin
   FDrawer.StrokeColor := StrokeColor;
   FDrawer.StrokeOpacity := StrokeOpacity;
 
+  i := 0;
   for y := 0 to 5 do
   begin
     for x := 0 to 5 do
@@ -1327,6 +1335,134 @@ begin
       CreateAndDrawCircle(MIN_RADIUS, round(maxRadius));
   finally
     circles.Free;
+  end;
+end;
+
+// -----------------------------------------------------------------------------
+// Piet Mondrian
+// https://generativeartistry.com/tutorials/piet-mondrian/
+// -----------------------------------------------------------------------------
+procedure TGeoPattern.GeneratePietMondrian;
+type
+  TSquare = record
+    X, Y: Double;
+    Width, Height: Double;
+    Color: TColor;
+  end;
+var
+  squares: array of TSquare = nil;
+
+  function CreateSquare(X, Y, Width, Height: Double): TSquare;
+  begin
+    Result.X := X;
+    Result.Y := Y;
+    Result.Width := Width;
+    Result.Height := Height;
+    Result.Color := 0;
+  end;
+
+  procedure PushSquare(ASquare: TSquare);
+  begin
+    SetLength(squares, Length(squares)+1);
+    squares[Length(squares)-1] := ASquare;
+  end;
+
+  procedure SplitOnX(ASquare: TSquare; SplitAt: Double);
+  var
+    squareA: TSquare;
+    squareB: TSquare;
+  begin
+    squareA := CreateSquare(ASquare.X, ASquare.Y, ASquare.Width - (ASquare.Width - SplitAt + ASquare.x), ASquare.Height);
+    squareB := CreateSquare(SplitAt, ASquare.Y, ASquare.Width - SplitAt + ASquare.X, ASquare.Height);
+    PushSquare(squareA);
+    PushSquare(squareB);
+  end;
+
+  procedure SplitOnY(ASquare: TSquare; SplitAt: Double);
+  var
+    squareA: TSquare;
+    squareB: TSquare;
+  begin
+    squareA := CreateSquare(ASquare.X, ASquare.Y, ASquare.Width, ASquare.Height - (ASquare.Height - SplitAt + ASquare.Y));
+    squareB := CreateSquare(ASquare.X, SplitAt, ASquare.Width, ASquare.Height - SplitAt + ASquare.Y);
+    PushSquare(squareA);
+    PushSquare(squareB);
+  end;
+
+  procedure SplitSquaresWith(X, Y: Double);
+  var
+    i, j: Integer;
+    square: TSquare;
+  begin
+    for i := High(squares) downto 0 do
+    begin
+      square := squares[i];
+      if (X > 0) and (X > square.X) and (X < square.X + square.Width) then
+        if Random > 0.5 then
+        begin
+          // Delete the element at index i
+          for j := i+1 to Length(squares)-1 do
+            squares[j-1] := squares[j];
+          SetLength(squares, Length(squares)-1);
+          SplitOnX(square, X);
+        end;
+      if (Y > 0) and (Y > square.Y) and (Y < square.Y + square.Height) then
+        if Random > 0.5 then
+        begin
+          // Delete the element at index i
+          for j := i+1 to Length(squares)-1 do
+            squares[j-1] := squares[j];
+          SetLength(squares, Length(squares)-1);
+          SplitOnY(square, Y);
+        end;
+    end;
+  end;
+
+const
+  WHITE = $F1F5F2;
+  COLORS: array[0..2] of TColor = ($2009D4, $A25613, $42D8F7);
+var
+  c: Double;
+  step: double;
+  i, j: Integer;
+  strokeWidth: Integer;
+begin
+  FTileWidth := Map(HexVal(FHash, 0), 0, 15, 120, 400);
+  FTileHeight := FTileWidth;
+  FDrawer.Init(FTileWidth, FTileHeight, FBkColor);
+  FDrawer.StrokeColor := clBlack; //StrokeColor;
+  FDrawer.StrokeOpacity := 1.0;   //StrokeOpacity;
+  strokeWidth := round(Map(HexVal(FHash, 1), 0, 15, 1, 8));
+  FDrawer.StrokeWidth := strokeWidth;
+  FDrawer.FillOpacity := 1.0;
+  step := FTileWidth / 7;
+  RandSeed := HexVal(FHash, 2, 2);
+
+  SetLength(squares, 1);
+  squares[0] := CreateSquare(0, 0, FTileWidth, FTileHeight);
+  c := 0;
+  while c < FTileWidth do
+  begin
+    SplitSquaresWith(0, c);
+    SplitSquaresWith(c, 0);
+    c := c + step;
+  end;
+
+  for i := 0 to High(COLORS) do
+  begin
+    repeat
+      j := Random(Length(squares));
+    until (squares[j].Color = 0) and (squares[j].Width > 2*strokewidth) and (squares[j].Height > 2*strokewidth);
+    squares[j].Color := COLORS[i];
+  end;
+
+  for i := 0 to High(squares) do
+  begin
+    if squares[i].Color = 0 then
+      FDrawer.FillColor := WHITE
+    else
+      FDrawer.FillColor := squares[i].Color;
+    FDrawer.Rectangle(squares[i].X, squares[i].Y, squares[i].Width, squares[i].Height);
   end;
 end;
 
