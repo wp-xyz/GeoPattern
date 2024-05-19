@@ -49,18 +49,7 @@ type
     FTileWidth, FTileHeight: Double;
     FOptions: TGeoPatternOptions;
 
-    function BuildHexagonShape(ASideLength: Double): TDblPoints;
-    function BuildOctogonShape(ASquareSize: Double): TDblPoints;
-    function BuildTriangleShape(ASideLength, AHeight: Double): TDblPoints;
-    function BuildRightTriangleShape(ASideLength: Double): TDblPoints;
     function BuildPlusShape(ASquareSize: Double): TDblPoints;
-    function BuildChevronShape(AWidth, AHeight: Double; Part: Integer): TDblPoints;
-    function BuildDiamondShape(AWidth, AHeight: Double): TDblPoints;
-    function BuildRotatedTriangleShape(ASideLength, ATriangleWidth: Double): TDblPoints;
-    function BuildRectangleShape(AWidth, AHeight: Double): TDblPoints;
-
-    procedure DrawInnerMosaicTile(X, Y, ATriangleSize: Double; AValue1, AValue2: Integer);
-    procedure DrawOuterMosaicTile(X, Y, ATriangleSize: Double; AValue: Integer);
 
     function BaseColor: TColor;
     function FillColor(AValue: Integer): TColor;
@@ -225,62 +214,6 @@ begin
     Result := STROKE_OPACITY;
 end;
 
-function TGeoPattern.BuildHexagonShape(ASideLength: Double): TDblPoints;
-var
-  a, b, c: Double;
-begin
-  c := ASideLength;
-  a := c / 2;
-  b := sin(DegToRad(60)) * c;
-  Result.Init(7);
-  Result.Data[0] := DblPoint(0,   b  );
-  Result.Data[1] := DblPoint(a,   0  );
-  Result.Data[2] := DblPoint(a+c, 0  );
-  Result.Data[3] := DblPoint(2*c, b  );
-  Result.Data[4] := DblPoint(a+c, 2*b);
-  Result.Data[5] := DblPoint(a,   2*b);
-  Result.Data[6] := DblPoint(0,   b  );
-end;
-
-function TGeoPattern.BuildOctogonShape(ASquareSize: Double): TDblPoints;
-var
-  s, c: Double;
-begin
-  s := ASquareSize;
-  c := s / 3;
-  Result.Init(9);
-  Result.Data[0] := DblPoint(c,     0    );
-  Result.Data[1] := DblPoint(s - c, 0    );
-  Result.Data[2] := DblPoint(s,     c    );
-  Result.Data[3] := DblPoint(s,     s - c);
-  Result.Data[4] := DblPoint(s - c, s    );
-  Result.Data[5] := DblPoint(c,     s    );
-  Result.Data[6] := DblPoint(0,     s - c);
-  Result.Data[7] := DblPoint(0,     c    );
-  Result.Data[8] := DblPoint(c,     0    );
-end;
-
-function TGeoPattern.BuildTriangleShape(ASideLength, AHeight: Double): TDblPoints;
-var
-  halfWidth: Double;
-begin
-  halfWidth := ASideLength / 2;
-  Result.Init(4);
-  Result.Data[0] := DblPoint(halfWidth, 0);
-  Result.Data[1] := DblPoint(ASideLength, AHeight);
-  Result.Data[2] := DblPoint(0, AHeight);
-  Result.Data[3] := DblPoint(halfWidth, 0);
-end;
-
-function TGeoPattern.BuildRightTriangleShape(ASideLength: Double): TDblPoints;
-begin
-  Result.Init(4);
-  Result.Data[0] := DblPoint(0, 0);
-  Result.Data[1] := DblPoint(ASideLength, ASideLength);
-  Result.Data[2] := DblPoint(0, ASideLength);
-  Result.Data[3] := DblPoint(0, 0);
-end;
-
 function TGeoPattern.BuildPlusShape(ASquareSize: Double): TDblPoints;
 begin
   Result.Init(13);
@@ -299,58 +232,6 @@ begin
   Result.Data[12] := DblPoint(0, ASquareSize);
 end;
 
-function TGeoPattern.BuildChevronShape(AWidth, AHeight: Double; Part: Integer): TDblPoints;
-var
-  e: Double;
-begin
-  e := AHeight * 0.66;
-  case Part of
-   1: begin
-        Result.Init(5);
-        Result.Data[0] := DblPoint(0, 0);
-        Result.Data[1] := DblPoint(AWidth / 2, AHeight - e);
-        Result.Data[2] := DblPoint(AWidth / 2, AHeight);
-        Result.Data[3] := DblPoint(0, e);
-        Result.Data[4] := DblPoint(0, 0);
-      end;
-   2: begin
-        Result.Init(5);
-        Result.Data[0] := DblPoint(AWidth / 2, AHeight - e);
-        Result.Data[1] := DblPoint(AWidth, 0);
-        Result.Data[2] := DblPoint(AWidth, e);
-        Result.Data[3] := DblPoint(AWidth / 2, AHeight);
-        Result.Data[4] := DblPoint(AWidth / 2, AHeight - e);
-      end;
-  end;
-end;
-
-function TGeoPattern.BuildDiamondShape(AWidth, AHeight: Double): TDblPoints;
-begin
-  Result.Init(4);
-  Result.Data[0] := DblPoint(AWidth / 2, 0);
-  Result.Data[1] := DblPoint(AWidth, AHeight / 2);
-  Result.Data[2] := DblPoint(AWidth / 2, AHeight);
-  Result.Data[3] := DblPoint(0, AHeight / 2);
-end;
-
-function TGeoPattern.BuildRotatedTriangleShape(ASideLength, ATriangleWidth: Double): TDblPoints;
-begin
-  Result.Init(4);
-  Result.Data[0] := DblPoint(0, 0);
-  Result.Data[1] := DblPoint(ATriangleWidth, ASideLength/2);
-  Result.Data[2] := DblPoint(0, ASideLength);
-  Result.Data[3] := DblPoint(0, 0);
-end;
-
-function TGeoPattern.BuildRectangleShape(AWidth, AHeight: Double): TDblPoints;
-begin
-  Result.Init(5);
-  Result.Data[0] := DblPoint(0, 0);
-  Result.Data[1] := DblPoint(AWidth, 0);
-  Result.Data[2] := DblPoint(AWidth, AHeight);
-  Result.Data[3] := DblPoint(0, AHeight);
-  Result.Data[4] := DblPoint(0, 0);
-end;
 
 procedure TGeoPattern.DrawToCanvas(ACanvas: TCanvas);
 var
@@ -427,7 +308,7 @@ begin
   if FOptions.OverridePatternType then
     idx := ord(FOptions.PatternType)
   else
-    idx := HexVal(FHash, 0);
+    idx := HexVal(FHash, 0, 2);
   case idx mod 17 of //ord(High(TGeoPatternType))+1 of
     0: GenerateHexagons;
     1: GenerateOverlappingCircles;
@@ -450,13 +331,31 @@ begin
 end;
 
 procedure TGeoPattern.GenerateHexagons;
+
+  function BuildHexagonShape(ASideLength: Double): TDblPoints;
+  var
+    a, b, c: Double;
+  begin
+    c := ASideLength;
+    a := c / 2;
+    b := sin(DegToRad(60)) * c;
+    Result.Init(7);
+    Result.Data[0] := DblPoint(0,   b  );
+    Result.Data[1] := DblPoint(a,   0  );
+    Result.Data[2] := DblPoint(a+c, 0  );
+    Result.Data[3] := DblPoint(2*c, b  );
+    Result.Data[4] := DblPoint(a+c, 2*b);
+    Result.Data[5] := DblPoint(a,   2*b);
+    Result.Data[6] := DblPoint(0,   b  );
+  end;
+
 var
   sideLength: Integer;
   hexHeight: Integer;
   hexWidth: Integer;
   hex: TDblPoints;
   dy: Double;
-  i, x, y, nx, ny, w, h: Integer;
+  i, x, y: Integer;
   value: Integer;
 begin
   sideLength := round(Map(HexVal(FHash, 0), 0, 15, 8, 60));
@@ -569,6 +468,25 @@ begin
 end;
 
 procedure TGeoPattern.GenerateOctogons;
+
+  function BuildOctogonShape(ASquareSize: Double): TDblPoints;
+  var
+    s, c: Double;
+  begin
+    s := ASquareSize;
+    c := s / 3;
+    Result.Init(9);
+    Result.Data[0] := DblPoint(c,     0    );
+    Result.Data[1] := DblPoint(s - c, 0    );
+    Result.Data[2] := DblPoint(s,     c    );
+    Result.Data[3] := DblPoint(s,     s - c);
+    Result.Data[4] := DblPoint(s - c, s    );
+    Result.Data[5] := DblPoint(c,     s    );
+    Result.Data[6] := DblPoint(0,     s - c);
+    Result.Data[7] := DblPoint(0,     c    );
+    Result.Data[8] := DblPoint(c,     0    );
+  end;
+
 var
   scale: Double;
   squareSize: Double;
@@ -599,6 +517,19 @@ begin
 end;
 
 procedure TGeoPattern.GenerateTriangles;
+
+  function BuildTriangleShape(ASideLength, AHeight: Double): TDblPoints;
+  var
+    halfWidth: Double;
+  begin
+    halfWidth := ASideLength / 2;
+    Result.Init(4);
+    Result.Data[0] := DblPoint(halfWidth, 0);
+    Result.Data[1] := DblPoint(ASideLength, AHeight);
+    Result.Data[2] := DblPoint(0, AHeight);
+    Result.Data[3] := DblPoint(halfWidth, 0);
+  end;
+
 var
   sideLength, triangleHeight: Double;
   triangle: TDblPoints;
@@ -766,39 +697,47 @@ begin
     end;
 end;
 
-procedure TGeoPattern.DrawInnerMosaicTile(X, Y, ATriangleSize: Double;
-  AValue1, AValue2: Integer);
-var
-  triangle: TDblPoints;
-begin
-  FDrawer.FillOpacity := FillOpacity(AValue1);
-  FDrawer.FillColor := FillColor(AValue2);
-  FDrawer.StrokeColor := StrokeColor;
-  FDrawer.StrokeOpacity := StrokeOpacity;
-
-  triangle := BuildRightTriangleShape(ATriangleSize);
-  FDrawer.Polygon(triangle.Scale(-1, -1).Translate(X + ATriangleSize, Y + ATriangleSize*2));
-  FDrawer.Polygon(triangle.Scale(1, 1).Translate(X + ATriangleSize, Y));
-end;
-
-procedure TGeoPattern.DrawOuterMosaicTile(X, Y, ATriangleSize: Double;
-  AValue: Integer);
-var
-  triangle: TDblPoints;
-begin
-  FDrawer.FillOpacity := FillOpacity(AValue);
-  FDrawer.FillColor := FillColor(AValue);
-  FDrawer.StrokeColor := StrokeColor;
-  FDrawer.StrokeOpacity := StrokeOpacity;
-
-  triangle := BuildRightTriangleShape(ATriangleSize);
-  FDrawer.Polygon(triangle.Scale(1, -1).Translate(X, Y + ATriangleSize));
-  FDrawer.Polygon(triangle.Scale(-1, -1).Translate(X + ATriangleSize * 2, Y + ATriangleSize));
-  FDrawer.Polygon(triangle.Scale(1, 1).Translate(X, Y + ATriangleSize));
-  FDrawer.Polygon(triangle.Scale(-1, 1).Translate(X + ATriangleSize * 2, Y + ATriangleSize));
-end;
-
 procedure TGeoPattern.GenerateMosaicSquares;
+
+  function BuildRightTriangleShape(ASideLength: Double): TDblPoints;
+  begin
+    Result.Init(4);
+    Result.Data[0] := DblPoint(0, 0);
+    Result.Data[1] := DblPoint(ASideLength, ASideLength);
+    Result.Data[2] := DblPoint(0, ASideLength);
+    Result.Data[3] := DblPoint(0, 0);
+  end;
+
+  procedure DrawInnerMosaicTile(X, Y, ATriangleSize: Double; AValue1, AValue2: Integer);
+  var
+    triangle: TDblPoints;
+  begin
+    FDrawer.FillOpacity := FillOpacity(AValue1);
+    FDrawer.FillColor := FillColor(AValue2);
+    FDrawer.StrokeColor := StrokeColor;
+    FDrawer.StrokeOpacity := StrokeOpacity;
+
+    triangle := BuildRightTriangleShape(ATriangleSize);
+    FDrawer.Polygon(triangle.Scale(-1, -1).Translate(X + ATriangleSize, Y + ATriangleSize*2));
+    FDrawer.Polygon(triangle.Scale(1, 1).Translate(X + ATriangleSize, Y));
+  end;
+
+  procedure DrawOuterMosaicTile(X, Y, ATriangleSize: Double; AValue: Integer);
+  var
+    triangle: TDblPoints;
+  begin
+    FDrawer.FillOpacity := FillOpacity(AValue);
+    FDrawer.FillColor := FillColor(AValue);
+    FDrawer.StrokeColor := StrokeColor;
+    FDrawer.StrokeOpacity := StrokeOpacity;
+
+    triangle := BuildRightTriangleShape(ATriangleSize);
+    FDrawer.Polygon(triangle.Scale(1, -1).Translate(X, Y + ATriangleSize));
+    FDrawer.Polygon(triangle.Scale(-1, -1).Translate(X + ATriangleSize * 2, Y + ATriangleSize));
+    FDrawer.Polygon(triangle.Scale(1, 1).Translate(X, Y + ATriangleSize));
+    FDrawer.Polygon(triangle.Scale(-1, 1).Translate(X + ATriangleSize * 2, Y + ATriangleSize));
+  end;
+
 var
   triangleSize: Double;
   i, x, y: Integer;
@@ -997,6 +936,32 @@ begin
 end;
 
 procedure TGeoPattern.GenerateChevrons;
+
+  function BuildChevronShape(AWidth, AHeight: Double; Part: Integer): TDblPoints;
+  var
+    e: Double;
+  begin
+    e := AHeight * 0.66;
+    case Part of
+     1: begin
+          Result.Init(5);
+          Result.Data[0] := DblPoint(0, 0);
+          Result.Data[1] := DblPoint(AWidth / 2, AHeight - e);
+          Result.Data[2] := DblPoint(AWidth / 2, AHeight);
+          Result.Data[3] := DblPoint(0, e);
+          Result.Data[4] := DblPoint(0, 0);
+        end;
+     2: begin
+          Result.Init(5);
+          Result.Data[0] := DblPoint(AWidth / 2, AHeight - e);
+          Result.Data[1] := DblPoint(AWidth, 0);
+          Result.Data[2] := DblPoint(AWidth, e);
+          Result.Data[3] := DblPoint(AWidth / 2, AHeight);
+          Result.Data[4] := DblPoint(AWidth / 2, AHeight - e);
+        end;
+    end;
+  end;
+
 var
   chevronWidth, chevronHeight: Double;
   chevron1: TDblPoints;
@@ -1039,6 +1004,16 @@ begin
 end;
 
 procedure TGeoPattern.GenerateDiamonds;
+
+  function BuildDiamondShape(AWidth, AHeight: Double): TDblPoints;
+  begin
+    Result.Init(4);
+    Result.Data[0] := DblPoint(AWidth / 2, 0);
+    Result.Data[1] := DblPoint(AWidth, AHeight / 2);
+    Result.Data[2] := DblPoint(AWidth / 2, AHeight);
+    Result.Data[3] := DblPoint(0, AHeight / 2);
+  end;
+
 var
   diamondWidth, diamondHeight: Double;
   diamond: TDblPoints;
@@ -1149,6 +1124,26 @@ begin
 end;
 
 procedure TGeoPattern.GenerateTesselation;
+
+  function BuildRotatedTriangleShape(ASideLength, ATriangleWidth: Double): TDblPoints;
+  begin
+    Result.Init(4);
+    Result.Data[0] := DblPoint(0, 0);
+    Result.Data[1] := DblPoint(ATriangleWidth, ASideLength/2);
+    Result.Data[2] := DblPoint(0, ASideLength);
+    Result.Data[3] := DblPoint(0, 0);
+  end;
+
+  function BuildRectangleShape(AWidth, AHeight: Double): TDblPoints;
+  begin
+    Result.Init(5);
+    Result.Data[0] := DblPoint(0, 0);
+    Result.Data[1] := DblPoint(AWidth, 0);
+    Result.Data[2] := DblPoint(AWidth, AHeight);
+    Result.Data[3] := DblPoint(0, AHeight);
+    Result.Data[4] := DblPoint(0, 0);
+  end;
+
 var
   sideLength: Double;           // Side length of the squares, triangles and hexagons
   hexHeight, hexWidth: Double;  // Width and height of the hexagon
@@ -1220,90 +1215,118 @@ begin
   end;
 end;
 
-
+// -----------------------------------------------------------------------------
+// Packed circles
+// https://generativeartistry.com/tutorials/circle-packing/
+// -----------------------------------------------------------------------------
 type
-  TCircle = class
+  TCircle = record
     X, Y, Radius: Double;
-    SafeToDraw: Boolean;
-    function CollidesWith(ACircle: TCircle): Boolean;
+    class operator = (A, B: TCircle): Boolean;
   end;
-  TCircleList = specialize TFPGObjectList<TCircle>;
+  TCircleList = specialize TFPGList<TCircle>;
 
-function TCircle.CollidesWith(ACircle: TCircle): Boolean;
-var
-  dist: Double;
+class operator TCircle.=(A, B: TCircle): Boolean;
 begin
-  if ACircle = self then
-    Result := true
-  else
-  if ACircle.SafeToDraw then
-  begin
-    dist := sqrt(sqr(X - ACircle.X) + sqr(Y - ACircle.Y));
-    Result := dist < (Radius + ACircle.Radius);
-  end else
-    Result := true;
+  Result := (A.X = B.X) and (A.Y = B.Y) and (A.Radius = B.Radius);
 end;
 
-// https://generativeartistry.com/tutorials/circle-packing/
+function CreateCircle(X, Y, Radius: Double): TCircle;
+begin
+  Result.X := X;
+  Result.Y := Y;
+  Result.Radius := Radius;
+end;
+
 procedure TGeoPattern.GeneratePackedCircles;
 const
   MIN_RADIUS = 5;
-  NUM_CIRCLES = 100;
+  TOTAL_CIRCLES = 500;
+  CREATE_CIRCLE_ATTEMPTS = 500;
 var
-  list: TCircleList;
-  circle: TCircle;
-  i, j: Integer;
-  value: Integer;
+  circles: TCircleList;
+
+  function DoesCircleHaveACollision(ACircle: TCircle): Boolean;
+  var
+    i: Integer;
+    otherCircle: TCircle;
+    centerDist: Double;
+  begin
+    Result := True;
+    for i := 0 to circles.Count-1 do
+    begin
+      otherCircle := circles{%H-}[i];
+      centerDist := sqrt(sqr(ACircle.X - otherCircle.X) + sqr(ACircle.Y - otherCircle.Y));
+      if centerDist <= ACircle.Radius + otherCircle.Radius then
+        exit;
+    end;
+    if (ACircle.X + ACircle.Radius > FTileWidth) or (ACircle.X - ACircle.Radius < 0) then
+      exit;
+    if (ACircle.Y + ACircle.Radius > FTileHeight) or (ACircle.Y - ACircle.Radius < 0) then
+      exit;
+    Result := false;
+  end;
+
+  procedure CreateAndDrawCircle(AMinRadius, AMaxRadius: Integer);
+  var
+    newCircle: TCircle;
+    circleSafeToDraw: Boolean = false;
+    tries, i: Integer;
+    radiusSize: Integer;
+    value: Integer;
+  begin
+    RandSeed := HexVal(FHash, 1) + HexVal(FHash, 2)*256;
+    for tries := 0 to CREATE_CIRCLE_ATTEMPTS-1 do
+    begin
+      newCircle := CreateCircle(Random * FTileWidth, Random * FTileHeight, MIN_RADIUS);
+      if DoesCircleHaveACollision(newCircle) then
+        Continue
+      else
+      begin
+        circleSafeToDraw := true;
+        Break;
+      end;
+    end;
+    if not circleSafeToDraw then
+      exit;
+    for radiusSize := AMinRadius to AMaxRadius do
+    begin
+      newCircle.Radius := radiusSize;
+      if DoesCircleHaveACollision(newCircle) then
+      begin
+        newCircle.Radius := newCircle.Radius - 1;
+        break;
+      end;
+    end;
+
+    {%H-}circles.Add(newCircle);
+    i := circles.Count;
+    value := HexVal(FHash, i);
+    FDrawer.FillColor := FillColor(value);
+    FDrawer.FillOpacity := FillOpacity(value);
+    FDrawer.Circle(newCircle.X, newCircle.Y, newCircle.Radius);
+
+    inc(i);
+  end;
+
+var
+  maxRadius: Double;
+  i: Integer;
 begin
   FTileWidth := Map(HexVal(FHash, 0), 0, 15, 30, 300);
   FTileHeight := FTileWidth;
   FDrawer.Init(FTileWidth, FTileHeight, FBkColor);
+  FDrawer.StrokeColor := StrokeColor;
+  FDrawer.StrokeOpacity := StrokeOpacity;
 
-  WriteLn('TileWidth: ', FTileWidth:0:3, ' TileHeight: ', FTileHeight:0:3);
+  maxRadius := FTileWidth / 2;
 
-
-  list := TCircleList.Create;
+  circles := TCircleList.Create;
   try
-    // Create circles
-    for i := 0 to NUM_CIRCLES do
-    begin
-      circle := TCircle.Create;
-      circle.X := Map(HexVal(FHash, i), 0, 15, 0, FTileWidth);
-      circle.Y := Map(HexVal(FHash, i+1), 0, 15, 0, FTileWidth);
-      circle.Radius := MIN_RADIUS;
-      circle.SafeToDraw := true;
-      list.Add(circle);
-      WriteLn(i:3, circle.X:10:3, circle.Y:10:3, circle.Radius:10:3, ' ', BoolToStr(circle.SafeToDraw, true));
-    end;
-    // Increase radius
-    for i := list.Count-1 downto 0 do
-    begin
-      circle := list[i];
-      for j := 0 to list.Count-1 do
-        if i <> j then
-        begin
-          if circle.CollidesWith(list[j]) then
-            circle.SafeToDraw := false
-          else
-            circle.Radius := circle.Radius + 1;
-        end;
-    end;
-
-    WriteLn('DRAWING');
-    for i := 0 to list.Count-1 do
-    begin
-      circle := list[i];
-      WriteLn(i:3, circle.X:10:3, circle.Y:10:3, circle.Radius:10:3, ' ', BoolToStr(circle.SafeToDraw, true));
-      if circle.SafeToDraw then
-      begin
-        value := HexVal(FHash, i+1);
-        FDrawer.FillColor := FillColor(value);
-        FDrawer.FillOpacity := FillOpacity(value);
-        FDrawer.Circle(circle.X, circle.Y, circle.Radius);
-      end;
-    end;
+    for i := 0 to TOTAL_CIRCLES-1 do
+      CreateAndDrawCircle(MIN_RADIUS, round(maxRadius));
   finally
-    list.Free;
+    circles.Free;
   end;
 end;
 
